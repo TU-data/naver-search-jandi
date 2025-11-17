@@ -18,6 +18,7 @@ const OUTPUT_HEIGHT = Number(process.env.OUTPUT_HEIGHT || 500);
 const OUTPUT_DIR = path.resolve(__dirname, '..', 'images');
 const LATEST_FILENAME = 'latest.png';
 const MOBILE_PROFILE = devices['Pixel 5'];
+const AD_STATUS_XPATH = '//html/body/div[2]/div[1]/section[1]/div/div[1]/div/div/span';
 
 if (!KEYWORDS.length) {
   throw new Error('검색어(SEARCH_KEYWORDS)가 비어 있습니다.');
@@ -53,6 +54,23 @@ function buildImageUrl(filename) {
     return `https://cdn.jsdelivr.net/gh/${process.env.GITHUB_REPOSITORY}@main/images/${filename}`;
   }
   throw new Error('IMAGE_BASE_URL 또는 GITHUB_REPOSITORY 값이 필요합니다.');
+}
+
+function getKstDateLabel() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  const kst = new Date(utc + 9 * 60 * 60000);
+  const pad = (value) => value.toString().padStart(2, '0');
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  return `${kst.getFullYear()}-${pad(kst.getMonth() + 1)}-${pad(kst.getDate())} (${dayNames[kst.getDay()]})`;
+}
+
+function buildAdStatusMessage(allVisible) {
+  const dateLabel = getKstDateLabel();
+  if (allVisible) {
+    return `${dateLabel} 검색광고 이상없이 노출 중 입니다✅`;
+  }
+  return `${dateLabel} 검색광고 노출에 이상이 있습니다❌`;
 }
 
 async function trimScreenshotHeight(filePath) {
@@ -105,8 +123,10 @@ async function captureScreenshots(browser, tmpDir) {
     const filePath = path.join(tmpDir, filename);
     await page.screenshot({ path: filePath, fullPage: true });
     await trimScreenshotHeight(filePath);
+    const adVisible = Boolean(await page.$(`xpath=${AD_STATUS_XPATH}`));
+    console.log(`광고 노출 상태 (${keyword}): ${adVisible ? '✅' : '❌'}`);
     await page.close();
-    screenshots.push({ keyword, filePath });
+    screenshots.push({ keyword, filePath, adVisible });
   }
   return screenshots;
 }
@@ -168,7 +188,7 @@ async function cleanupOldImages() {
   );
 }
 
-async function sendJandiNotification(imageUrl, timestampLabel) {
+async function sendJandiNotification(imageUrl, timestampLabel, adStatusMessage, keywordStatusText) {
   const webhook = process.env.JANDI_WEBHOOK_URL;
   if (!webhook) {
     console.warn('JANDI_WEBHOOK_URL 이 설정되지 않아 알림을 건너뜁니다.');
@@ -182,6 +202,10 @@ async function sendJandiNotification(imageUrl, timestampLabel) {
       {
         title: '검색 키워드',
         description: KEYWORDS.join(' | '),
+      },
+      {
+        title: '검색광고 상태',
+        description: [adStatusMessage, keywordStatusText].filter(Boolean).join('\n'),
       },
       {
         title: '스크린샷 이미지',
@@ -218,7 +242,12 @@ async function run() {
     await cleanupOldImages();
 
     const imageUrl = buildImageUrl(finalFilename);
-    await sendJandiNotification(imageUrl, timestamp);
+    const allVisible = screenshots.every((item) => item.adVisible);
+    const adStatusMessage = buildAdStatusMessage(allVisible);
+    const keywordStatusText = screenshots
+      .map((item) => `${item.keyword}: ${item.adVisible ? '✅ 이상 없음' : '❌ 이상 있음'}`)
+      .join('\n');
+    await sendJandiNotification(imageUrl, timestamp, adStatusMessage, keywordStatusText);
   } finally {
     await browser.close();
     await fs.remove(tmpDir);
