@@ -13,6 +13,8 @@ const KEYWORDS = (process.env.SEARCH_KEYWORDS || '티유치과,tu치과,제로�
 const RETENTION_DAYS = Number(process.env.RETENTION_DAYS || 7);
 const PAGE_WAIT_MS = Number(process.env.PAGE_WAIT_MS || 4000);
 const MAX_IMAGE_HEIGHT = Number(process.env.MAX_IMAGE_HEIGHT || 500);
+const OUTPUT_WIDTH = Number(process.env.OUTPUT_WIDTH || 500);
+const OUTPUT_HEIGHT = Number(process.env.OUTPUT_HEIGHT || 500);
 const OUTPUT_DIR = path.resolve(__dirname, '..', 'images');
 const LATEST_FILENAME = 'latest.png';
 const MOBILE_PROFILE = devices['Pixel 5'];
@@ -68,6 +70,20 @@ async function trimScreenshotHeight(filePath) {
       top: 0,
       width: metadata.width || MOBILE_PROFILE.viewport.width || 1080,
       height: MAX_IMAGE_HEIGHT,
+    })
+    .toFile(tmpFile);
+  await fs.move(tmpFile, filePath, { overwrite: true });
+}
+
+async function resizeFinalImage(filePath) {
+  if (!OUTPUT_WIDTH || !OUTPUT_HEIGHT) {
+    return;
+  }
+  const tmpFile = `${filePath}.resized`;
+  await sharp(filePath)
+    .resize(OUTPUT_WIDTH, OUTPUT_HEIGHT, {
+      fit: 'contain',
+      background: '#ffffff',
     })
     .toFile(tmpFile);
   await fs.move(tmpFile, filePath, { overwrite: true });
@@ -192,6 +208,7 @@ async function run() {
     const finalPath = path.join(OUTPUT_DIR, finalFilename);
 
     await combineImages(screenshots, finalPath);
+    await resizeFinalImage(finalPath);
     console.log(`Combined image written to ${finalPath}`);
 
     const latestPath = path.join(OUTPUT_DIR, LATEST_FILENAME);

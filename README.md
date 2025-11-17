@@ -21,6 +21,7 @@ cp .env.example .env
 - `RETENTION_DAYS` : 이미지 보관 일수 (기본 7일)
 - `PAGE_WAIT_MS` : 결과 페이지 안정화 대기 시간(ms)
 - `MAX_IMAGE_HEIGHT` : 각 검색 스크린샷과 합성 이미지의 최대 높이(px, 기본 500) – 상단만 남기고 잘라냅니다.
+- `OUTPUT_WIDTH`, `OUTPUT_HEIGHT` : 최종 합성 이미지의 목표 폭/높이(px, 기본 500×500)
 - `IMAGE_BASE_URL` : 로컬 실행 시 이미지를 외부에 노출할 수 있는 정적 URL (CI에서는 `https://cdn.jsdelivr.net/gh/<OWNER>/<REPO>@main/images`로 자동 계산)
 
 ## 실행 방법
@@ -42,5 +43,6 @@ npm run monitor
 2. Sharp가 세 개의 이미지를 가로로 이어 붙여 `images/naver-search-YYYYMMDD-HHMMSS.png`를 생성하고, 동일 이미지를 `images/latest.png`로 복사합니다.
 3. 7일 이상 지난 이미지 파일은 `latest.png`를 제외하고 삭제합니다.
 4. jsDelivr CDN URL(`https://cdn.jsdelivr.net/gh/<OWNER>/<REPO>@main/images/...`)을 사용해 잔디 웹훅에 이미지가 포함된 메시지를 전송하므로, 잔디에서 바로 이미지를 볼 수 있습니다.
+5. 최종 이미지는 `OUTPUT_WIDTH` × `OUTPUT_HEIGHT` 값(기본 500×500)에 맞게 축소되어 고정 크기로 전달됩니다.
 
 필요 시 `SEARCH_KEYWORDS`, `RETENTION_DAYS`, `PAGE_WAIT_MS` 등의 환경 변수를 수정해 요구사항에 맞출 수 있습니다.
