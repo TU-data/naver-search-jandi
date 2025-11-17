@@ -34,7 +34,7 @@ npm run monitor
 ```
 
 ### GitHub Actions 스케줄
-- 기본 cron: `0 22 * * *` (UTC 기준 22:00 → 한국시간 오전 7시). 원하는 주기로 수정하려면 `.github/workflows/naver-monitor.yml`의 `schedule` 블록을 편집하세요.
+- 기본 cron: `0 23 * * *` (UTC 기준 23:00 → 한국시간 오전 8시). 원하는 주기로 수정하려면 `.github/workflows/naver-monitor.yml`의 `schedule` 블록을 편집하세요.
 - 수동 실행은 GitHub Actions 탭에서 `Run workflow` 버튼으로 가능.
 - 워크플로는 실행 후 `images/` 폴더를 커밋/푸시하므로 저장소에 쓰기 권한이 필요합니다.
 
