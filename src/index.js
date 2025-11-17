@@ -12,6 +12,7 @@ const KEYWORDS = (process.env.SEARCH_KEYWORDS || '티유치과,tu치과,제로�
   .filter(Boolean);
 const RETENTION_DAYS = Number(process.env.RETENTION_DAYS || 7);
 const PAGE_WAIT_MS = Number(process.env.PAGE_WAIT_MS || 4000);
+const MAX_IMAGE_HEIGHT = Number(process.env.MAX_IMAGE_HEIGHT || 500);
 const OUTPUT_DIR = path.resolve(__dirname, '..', 'images');
 const LATEST_FILENAME = 'latest.png';
 const MOBILE_PROFILE = devices['Pixel 5'];
@@ -47,9 +48,29 @@ function buildImageUrl(filename) {
     return `${base}/${filename}`;
   }
   if (process.env.GITHUB_REPOSITORY) {
-    return `https://raw.githubusercontent.com/${process.env.GITHUB_REPOSITORY}/main/images/${filename}`;
+    return `https://cdn.jsdelivr.net/gh/${process.env.GITHUB_REPOSITORY}@main/images/${filename}`;
   }
   throw new Error('IMAGE_BASE_URL 또는 GITHUB_REPOSITORY 값이 필요합니다.');
+}
+
+async function trimScreenshotHeight(filePath) {
+  if (!MAX_IMAGE_HEIGHT) {
+    return;
+  }
+  const metadata = await sharp(filePath).metadata();
+  if (!metadata.height || metadata.height <= MAX_IMAGE_HEIGHT) {
+    return;
+  }
+  const tmpFile = `${filePath}.trim`;
+  await sharp(filePath)
+    .extract({
+      left: 0,
+      top: 0,
+      width: metadata.width || MOBILE_PROFILE.viewport.width || 1080,
+      height: MAX_IMAGE_HEIGHT,
+    })
+    .toFile(tmpFile);
+  await fs.move(tmpFile, filePath, { overwrite: true });
 }
 
 async function captureScreenshots(browser, tmpDir) {
@@ -67,6 +88,7 @@ async function captureScreenshots(browser, tmpDir) {
     const filename = `${timestampString()}-${sanitize(keyword)}.png`;
     const filePath = path.join(tmpDir, filename);
     await page.screenshot({ path: filePath, fullPage: true });
+    await trimScreenshotHeight(filePath);
     await page.close();
     screenshots.push({ keyword, filePath });
   }
