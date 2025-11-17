@@ -27,6 +27,12 @@ jobs:
       - name: Capture screenshots
         env:
           JANDI_WEBHOOK_URL: ${{ secrets.JANDI_WEBHOOK_URL }}
+          SEARCH_KEYWORDS: ${{ secrets.SEARCH_KEYWORDS || '티유치과,tu치과,제로네이트' }}
+          RETENTION_DAYS: ${{ secrets.RETENTION_DAYS || '7' }}
+          PAGE_WAIT_MS: ${{ secrets.PAGE_WAIT_MS || '4000' }}
+          MAX_IMAGE_HEIGHT: ${{ secrets.MAX_IMAGE_HEIGHT || '0' }}
+          OUTPUT_WIDTH: ${{ secrets.OUTPUT_WIDTH || '500' }}
+          OUTPUT_HEIGHT: ${{ secrets.OUTPUT_HEIGHT || '400' }}
         run: npm run monitor
 
       - name: Commit updated images
