@@ -20,7 +20,7 @@ cp .env.example .env
 - `SEARCH_KEYWORDS` : 쉼표로 구분한 검색어 목록
 - `RETENTION_DAYS` : 이미지 보관 일수 (기본 7일)
 - `PAGE_WAIT_MS` : 결과 페이지 안정화 대기 시간(ms)
-- `MAX_IMAGE_HEIGHT` : 각 검색 스크린샷과 합성 이미지의 최대 높이(px, 기본 500) – 상단만 남기고 잘라냅니다.
+- `MAX_IMAGE_HEIGHT` : 각 검색 스크린샷을 상단 기준으로 잘라낼 최대 높이(px, 기본 0 → 자르지 않음). 필요 시 값 지정.
 - `OUTPUT_WIDTH`, `OUTPUT_HEIGHT` : 최종 합성 이미지의 목표 폭/높이(px, 기본 500×500)
 - `IMAGE_BASE_URL` : 로컬 실행 시 이미지를 외부에 노출할 수 있는 정적 URL (CI에서는 `https://cdn.jsdelivr.net/gh/<OWNER>/<REPO>@main/images`로 자동 계산)
 
