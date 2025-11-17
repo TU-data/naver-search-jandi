@@ -12,7 +12,7 @@ const KEYWORDS = (process.env.SEARCH_KEYWORDS || '티유치과,tu치과,제로�
   .filter(Boolean);
 const RETENTION_DAYS = Number(process.env.RETENTION_DAYS || 7);
 const PAGE_WAIT_MS = Number(process.env.PAGE_WAIT_MS || 4000);
-const MAX_IMAGE_HEIGHT = Number(process.env.MAX_IMAGE_HEIGHT || 500);
+const MAX_IMAGE_HEIGHT = Number(process.env.MAX_IMAGE_HEIGHT || 0);
 const OUTPUT_WIDTH = Number(process.env.OUTPUT_WIDTH || 500);
 const OUTPUT_HEIGHT = Number(process.env.OUTPUT_HEIGHT || 500);
 const OUTPUT_DIR = path.resolve(__dirname, '..', 'images');
