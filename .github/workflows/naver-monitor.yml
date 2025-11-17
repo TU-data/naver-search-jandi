@@ -1,0 +1,40 @@
+name: Naver Search Monitor
+
+on:
+  schedule:
+    - cron: "0 22 * * *" # 한국 시간 오전 7시(UTC+9 07:00)에 해당
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture screenshots
+        env:
+          JANDI_WEBHOOK_URL: ${{ secrets.JANDI_WEBHOOK_URL }}
+        run: npm run monitor
+
+      - name: Commit updated images
+        run: |
+          if [[ -n "$(git status --porcelain images)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add images
+            git commit -m "chore: update screenshots"
+            git push
+          fi
