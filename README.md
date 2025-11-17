@@ -44,5 +44,6 @@ npm run monitor
 3. 7일 이상 지난 이미지 파일은 `latest.png`를 제외하고 삭제합니다.
 4. jsDelivr CDN URL(`https://cdn.jsdelivr.net/gh/<OWNER>/<REPO>@main/images/...`)을 사용해 잔디 웹훅에 이미지가 포함된 메시지를 전송하므로, 잔디에서 바로 이미지를 볼 수 있습니다.
 5. 최종 이미지는 `OUTPUT_WIDTH` × `OUTPUT_HEIGHT` 값(기본 500×500)에 맞게 축소되어 고정 크기로 전달됩니다.
+6. 각 검색 페이지에서 `//html/body/div[2]/div[1]/section[1]/div/div[1]/div/div/span` 요소가 존재하는지 확인해, 한국 시간 기준 날짜와 함께 “검색광고 이상없이 노출 중” 또는 “노출에 이상이 있습니다” 메시지를 잔디에 포함합니다.
 
 필요 시 `SEARCH_KEYWORDS`, `RETENTION_DAYS`, `PAGE_WAIT_MS` 등의 환경 변수를 수정해 요구사항에 맞출 수 있습니다.
