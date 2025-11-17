@@ -82,8 +82,8 @@ async function resizeFinalImage(filePath) {
   const tmpFile = `${filePath}.resized`;
   await sharp(filePath)
     .resize(OUTPUT_WIDTH, OUTPUT_HEIGHT, {
-      fit: 'contain',
-      background: '#ffffff',
+      fit: 'cover',
+      position: 'top',
     })
     .toFile(tmpFile);
   await fs.move(tmpFile, filePath, { overwrite: true });
