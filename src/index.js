@@ -248,9 +248,45 @@ async function run() {
       .map((item) => `${item.keyword}: ${item.adVisible ? '✅ 이상 없음' : '❌ 이상 있음'}`)
       .join('\n');
     await sendJandiNotification(imageUrl, timestamp, adStatusMessage, keywordStatusText);
+    await updateBrandCheckSheet(screenshots);
   } finally {
     await browser.close();
     await fs.remove(tmpDir);
+  }
+}
+async function updateBrandCheckSheet(screenshots) {
+  const gasUrl = process.env.GAS_WEBHOOK_URL;
+  if (!gasUrl) {
+    console.warn('GAS_WEBHOOK_URL 이 설정되지 않아 시트 업데이트를 건너뜁니다.');
+    return;
+  }
+
+  const now = new Date();
+  const kst = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 9 * 60 * 60000);
+  const pad = v => v.toString().padStart(2, '0');
+  const today = `${kst.getFullYear()}-${pad(kst.getMonth() + 1)}-${pad(kst.getDate())}`;
+
+  const statusMap = {};
+  screenshots.forEach(item => {
+    const key = item.keyword === 'tu치과' ? 'TU치과' : item.keyword;
+    statusMap[key] = item.adVisible;
+  });
+
+  const payload = {
+    date: today,
+    "티유치과":  statusMap["티유치과"]  ?? false,
+    "TU치과":    statusMap["TU치과"]    ?? false,
+    "제로네이트": statusMap["제로네이트"] ?? false,
+  };
+
+  try {
+    const res = await axios.post(gasUrl, payload, {
+      headers: { 'Content-Type': 'application/json' },
+      maxRedirects: 5,
+    });
+    console.log('시트 업데이트 완료:', res.data);
+  } catch (err) {
+    console.error('시트 업데이트 실패:', err.message);
   }
 }
 
