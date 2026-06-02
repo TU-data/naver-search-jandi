@@ -45,4 +45,5 @@ jobs:
               echo "Retry $i failed, waiting..."
               sleep 5
             done
+            git stash pop 2>/dev/null || true
           fi
